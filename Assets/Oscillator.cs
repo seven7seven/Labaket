@@ -83,17 +83,35 @@ public class Oscillator : MonoBehaviour
         SetScale(scale);
     }
 
+    public void PlayScale(string key, int[] pattern)
+    {
+        double[] scale = ComputeScale(key, pattern);
+        SetScale(scale);
+
+        gain = 0;
+    }
+
+    public void PlayNote()
+    {
+        // Play next note in current scale
+        gain = volume;
+
+        Debug.Log("Play note!");
+
+        frequency = current_scale[scale_index];
+        scale_index = (scale_index + 1) % current_scale.Length;
+    }
+
+    public void Stop()
+    {
+        gain = 0;
+    }
+
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            // Play next note in current scale
-            gain = volume;
-
-            Debug.Log(current_scale);
-
-            frequency = current_scale[scale_index];
-            scale_index = (scale_index + 1) % current_scale.Length;
+            PlayNote();
         }
         if (Input.GetKeyUp(KeyCode.Space))
         {
@@ -109,6 +127,7 @@ public class Oscillator : MonoBehaviour
         {
             phase += increment;
             data[i] = (float)(gain * Mathf.Sin((float)phase));
+            data[i] += (float)(gain * (double)Mathf.PingPong((float)phase, 1.0f));
 
             if (channels == 2)
             {
